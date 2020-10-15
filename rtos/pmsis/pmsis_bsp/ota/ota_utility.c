@@ -114,6 +114,16 @@ ota_utility_get_ota_state(pi_device_t *flash, const uint32_t partition_offset, o
     
     pi_flash_read(flash, partition_offset, ota_states_l2, sizeof(ota_state_t));
     pi_flash_read(flash, partition_offset + flash_info.sector_size, ota_states_l2 + 1, sizeof(ota_state_t));
+
+    printf("partition offset %d\n", partition_offset);
+    printf("sector size %d\n", flash_info.sector_size);
+
+    uint8_t* data_ota_states = (uint8_t * )ota_states_l2;
+    for(uint16_t i=0; i<2*sizeof(ota_state_t);i++)
+    {
+        printf("%x ", data_ota_states[i]);
+
+    }
     
     PI_LOG_TRC("ota", "Check if OTA data 0 is valid");
     s0_is_valid = ota_utility_state_is_valid(ota_states_l2 + 0);

@@ -25,7 +25,10 @@
 
 #define JPEG_BITSTREAM_SIZE (1024)
 
-
+#ifdef PERF
+unsigned int perf_jpeg[2];
+unsigned int perf_streamer[2];
+#endif
 
 typedef struct
 {
@@ -202,6 +205,18 @@ int frame_streamer_send_async(frame_streamer_t *streamer, pi_buffer_t *buffer, p
 {
   uint8_t *frame = buffer->data;
 
+#ifdef PERF
+  perf_jpeg[0] = 0;
+  perf_jpeg[1] = 0;
+  perf_streamer[0] = 0;
+  perf_streamer[1] = 0;
+  
+  pi_perf_stop();
+  perf_streamer[0] = pi_perf_read(PI_PERF_CYCLES);
+  pi_perf_start();
+#endif
+
+
   if (streamer->format == FRAME_STREAMER_FORMAT_RAW)
   {
     int size = pi_buffer_size(buffer);
@@ -216,7 +231,21 @@ int frame_streamer_send_async(frame_streamer_t *streamer, pi_buffer_t *buffer, p
     uint32_t size;
     while(1)
     {
+#ifdef PERF
+      pi_perf_stop();
+      perf_jpeg[0] = pi_perf_read(PI_PERF_CYCLES);
+      pi_perf_start();
+#endif
+
       int err = jpeg_encoder_process(&streamer->jpeg->encoder, buffer, &streamer->jpeg->bitstream, &size);
+
+#ifdef PERF
+      pi_perf_stop();
+      perf_jpeg[1] = pi_perf_read(PI_PERF_CYCLES);
+      pi_perf_start();
+#endif
+
+
 
       streamer->header.info = err ? 0 : 1;
 
@@ -236,6 +265,13 @@ int frame_streamer_send_async(frame_streamer_t *streamer, pi_buffer_t *buffer, p
   {
     return -1;
   }
+
+#ifdef PERF
+      pi_perf_stop();
+      perf_streamer[1] = pi_perf_read(PI_PERF_CYCLES);
+      printf("streamer time = %d, jpeg encoder time = %d\n", (perf_streamer[1] - perf_streamer[0]),(perf_jpeg[1]-perf_jpeg[0]));
+      pi_perf_start();
+#endif
 
   return 0;
 }

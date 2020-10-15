@@ -48,6 +48,7 @@ void test_gpio(void)
 
     while (1)
     {
+//        pi_yield();
         pi_gpio_pin_read(&gpio, gpio_in, &value);
         printf("GPIO %d in: %d\n", gpio_in & 0xFF, value);
         pi_time_wait_us(1000000);

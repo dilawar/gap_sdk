@@ -66,14 +66,14 @@ def appendArgs(parser: argparse.ArgumentParser) -> None:
 
 def operationFunc(args, config=None):
 	
-	traces.info("gen_partition tools")
+	print("gen_partition tools")
 	
 	input = args.input.read()
 	if isBinaryPartitionTable(input):
-		traces.info("Parsing binary partition file input: %s..." % args.input.name)
+		print("Parsing binary partition file input: %s..." % args.input.name)
 		table = PartitionTable.from_binary(input)
 	else:
-		traces.info("Parsing CSV input file: %s..." % args.input.name)
+		print("Parsing CSV input file: %s..." % args.input.name)
 		try:
 			input = input.decode()
 		except UnicodeDecodeError:
@@ -81,7 +81,7 @@ def operationFunc(args, config=None):
 		table = PartitionTable.from_csv(input, args.partitionTableOffset, args.blockSize, args.md5Sum)
 	
 	if not args.no_verify:
-		traces.info("Verifying table...")
+		print("Verifying table...")
 		table.verify(partitionTableOffset = args.partitionTableOffset,
 		             flashSectorSize = args.blockSize,
 		             flashSize = args.flashSize)
